@@ -22,8 +22,8 @@ jobs:
 #          echo "Workspace: ${{ github.workspace }}/application-service"
 #          ls -al ${{ github.workspace }}/application-service
         run: |
-          echo "Workspace: ${{ github.workspace }}/service-order"
-          ls -al ${{ github.workspace }}/service-order          
+          echo "Workspace: ${{ github.workspace }}/service-patient"
+          ls -al ${{ github.workspace }}/service-patient          
 
       # Step 3: Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -41,8 +41,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ github.workspace }}/service-order
-          file: ${{ github.workspace }}/service-order/Dockerfile
+          context: ${{ github.workspace }}/service-patient
+          file: ${{ github.workspace }}/service-patient/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
