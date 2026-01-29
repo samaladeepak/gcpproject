@@ -1,0 +1,49 @@
+name: Build and Push Docker Image to Docker Hub
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 2: Debug workspace (confirm Dockerfile exists)
+      - name: List files in repo root
+#        run: |
+#          echo "Workspace: ${{ github.workspace }}/application-service"
+#          ls -al ${{ github.workspace }}/application-service
+        run: |
+          echo "Workspace: ${{ github.workspace }}/service-order"
+          ls -al ${{ github.workspace }}/service-order          
+
+      # Step 3: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 4: Set image tag
+      - name: Set image tags
+        id: vars
+        run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      # Step 5: Build and push Docker image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}/service-order
+          file: ${{ github.workspace }}/service-order/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
+            ${{ secrets.DOCKER_USERNAME }}/app-service-image:${{ steps.vars.outputs.TAG }}
