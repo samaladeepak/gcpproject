@@ -1,9 +1,9 @@
 name: Docker Build
 
-# on:
-#   push:
-#     branches: [ "main" ]
-#   workflow_dispatch:
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -38,17 +38,12 @@ jobs:
         run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
       # Step 5: Build and push Docker image
-      #- name: Build and Push Docker Image
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     context: ./service-patient       # folder containing Dockerfile and app
-      #     file: ./service-patient/Dockerfile
-      #     push: true
-      #     tags: |
-      #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
-      #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:${{ steps.vars.outputs.TAG }}
       - name: Build and Push Docker Image
-        run: |
-         docker build -t ${{ secrets.DOCKER_USERNAME }}/updated-image:latest ./service-patient
-         docker push ${{ secrets.DOCKER_USERNAME }}/updated-image:latest
-         docker run -d -p 5005:5005 ${{ secrets.DOCKER_USERNAME }}/updated-image:latest
+        uses: docker/build-push-action@v6
+        with:
+          context: ./service-appointment       # folder containing Dockerfile and app
+          file: ./service-appointment/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/appointment-service-image:latest
+            ${{ secrets.DOCKER_USERNAME }}/appointment-service-image:${{ steps.vars.outputs.TAG }}
