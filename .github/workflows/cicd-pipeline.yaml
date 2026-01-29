@@ -41,8 +41,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ github.workspace }}/service-patient
-          file: ${{ github.workspace }}/service-patient/Dockerfile
+          context: ./service-patient/src       # folder containing Dockerfile and app
+          file: ./service-patient/src/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
