@@ -47,7 +47,8 @@ jobs:
       #     tags: |
       #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
       #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:${{ steps.vars.outputs.TAG }}
-      - name: Build and Push Docker Image      
+      - name: Build and Push Docker Image
+        run: |      
           docker build -t ${{ secrets.DOCKER_USERNAME }}/updated-image .
           docker push ${{ secrets.DOCKER_USERNAME }}/updated-image:latest
           docker run -d -p 5005:5005 ${{ secrets.DOCKER_USERNAME }}/updated-image:latest
