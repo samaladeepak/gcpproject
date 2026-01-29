@@ -3,6 +3,8 @@ name: Docker Build
 # on:
 #   push:
 #     branches: [ "main" ]
+#     paths:
+#       - '.github/workflows/dockerbuildpush.yaml'
 #   workflow_dispatch:
 
 jobs:

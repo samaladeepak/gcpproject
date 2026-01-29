@@ -3,6 +3,9 @@ name: Docker Build
 on:
   push:
     branches: [ "main" ]
+
+    paths:
+      - '.github/workflows/appointment-cicd.yaml'
   workflow_dispatch:
 
 jobs:
