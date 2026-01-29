@@ -49,3 +49,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/appointment-service-image:latest
             ${{ secrets.DOCKER_USERNAME }}/appointment-service-image:${{ steps.vars.outputs.TAG }}
+            
