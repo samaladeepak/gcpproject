@@ -48,6 +48,10 @@ jobs:
       #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:latest
       #       ${{ secrets.DOCKER_USERNAME }}/app-service-image:${{ steps.vars.outputs.TAG }}
       - name: Build and Push Docker Image
+        with:
+           context: ./service-patient       # folder containing Dockerfile and app
+           file: ./service-patient/Dockerfile
+           push: true
         run: |      
           docker build -t ${{ secrets.DOCKER_USERNAME }}/updated-image .
           docker push ${{ secrets.DOCKER_USERNAME }}/updated-image:latest
