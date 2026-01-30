@@ -1,4 +1,4 @@
-name: CI-CD-GCP-GKE
+name: CI-CD-GCP-AR-GKE
 
 on:
   push:
@@ -8,9 +8,10 @@ on:
 
 env:
   PROJECT_ID: qwiklabs-gcp-01-5d31b7318694
-  REGION: us-west1
+  REGION: us-central1
   REPOSITORY: demo-ar
-  IMAGE_NAME: service-patient
+  IMAGE1_NAME: service-appointment
+  IMAGE2_NAME: service-patient
   # GKE_CLUSTER: my-gke-cluster
   # GKE_ZONE: us-west
   # GKE_NAMESPACE: default
@@ -61,14 +62,18 @@ jobs:
     - name: Build Docker image
       run: |
         docker build \
+        -f ./service-appointment/Dockerfile \
+        -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE1_NAME }}:latest .
+        docker build \
         -f ./service-patient/Dockerfile \
-        -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
+        -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:latest .
 
       # 6️⃣ Push Docker image
-    - name: Push Docker image
+    - name: Push Docker image to Artifact Registory
       run: |
         docker push \
-        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE1_NAME }}:latest
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:latest
     # # 7️⃣ Get GKE credentials
     # - name: Get GKE credentials
     #   uses: google-github-actions/get-gke-credentials@v2
