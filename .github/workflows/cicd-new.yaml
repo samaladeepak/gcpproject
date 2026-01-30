@@ -7,14 +7,16 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: qwiklabs-gcp-01-5d31b7318694
-  REGION: us-central1
+  PROJECT_ID: qwiklabs-gcp-04-a1d1e88b5cb8
+  REGION: us-west1
   REPOSITORY: demo-ar
   IMAGE1_NAME: service-appointment
   IMAGE2_NAME: service-patient
-  # GKE_CLUSTER: my-gke-cluster
-  # GKE_ZONE: us-west
-  # GKE_NAMESPACE: default
+  HELM_RELEASE: patient-release
+  HELM_CHART_PATH: ./helm/patient 
+  GKE_CLUSTER: autopilot-cluster-1
+  GKE_ZONE: us-west1-a
+  GKE_NAMESPACE: default
 
 jobs:
   build-and-deploy:
@@ -74,20 +76,35 @@ jobs:
     #     docker push \
     #     # ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE1_NAME }}:latest
     #     ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:latest
-    # # 7️⃣ Get GKE credentials
-    # - name: Get GKE credentials
-    #   uses: google-github-actions/get-gke-credentials@v2
-    #   with:
-    #     cluster_name: ${{ env.GKE_CLUSTER }}
-    #     location: ${{ env.GKE_ZONE }}
-    #     project_id: ${{ env.PROJECT_ID }}
+    # 7️⃣ Get GKE credentials
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        project_id: ${{ env.PROJECT_ID }}
 
     # # 8️⃣ Deploy to GKE
     # - name: Deploy to GKE
     #   run: |
     #     kubectl set image deployment/my-deployment \
-    #     my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+    #     my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:${{ github.sha }} \
     #     -n ${{ env.GKE_NAMESPACE }}
+
+              # 5️⃣ Install Helm (if not already)
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.12.0
+
+      # 6️⃣ Deploy/Upgrade via Helm
+    - name: Deploy to GKE using Helm
+      run: |
+        helm upgrade --install ${{ env.HELM_RELEASE }} ${{ env.HELM_CHART_PATH }} \
+          --namespace default \
+          --set image.repository=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }} \
+          --set image.tag=${{ env.TAG }} \
+          --wait
 
     # # 9️⃣ Verify rollout
     # - name: Verify deployment
