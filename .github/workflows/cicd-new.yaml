@@ -15,7 +15,7 @@ env:
   HELM_RELEASE: patient-release
   HELM_CHART_PATH: ./helm/patient 
   GKE_CLUSTER: autopilot-cluster-1
-  GKE_ZONE: us-west1-a
+  GKE_ZONE: us-west1
   GKE_NAMESPACE: default
 
 jobs:
