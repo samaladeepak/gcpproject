@@ -10,7 +10,7 @@ env:
   PROJECT_ID: qwiklabs-gcp-00-e300216e6bf3
   REGION: us-west1
   REPOSITORY: demo-ar
-  IMAGE_NAME: appointment
+  IMAGE_NAME: service-patient
   # GKE_CLUSTER: my-gke-cluster
   # GKE_ZONE: us-west
   # GKE_NAMESPACE: default
@@ -41,18 +41,23 @@ jobs:
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-    # 5️⃣ Build Docker image
-    - name: Build Docker image
-      run: |
-        docker build -t \
-        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+    # Step 4: Set image tag (same as before)
+    - name: Set image tags
+      id: vars
+      run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
-    # 6️⃣ Push Docker image to Artifact Registry
-    - name: Push Docker image
-      run: |
-        docker push \
-        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+# Step 5: Build and push Docker image to Artifact Registry
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./service-patient
+        file: ./service-patient/Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
 
+      
     # # 7️⃣ Get GKE credentials
     # - name: Get GKE credentials
     #   uses: google-github-actions/get-gke-credentials@v2
