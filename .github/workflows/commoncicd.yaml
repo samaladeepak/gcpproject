@@ -1,0 +1,51 @@
+name: CI Pipeline
+
+on:
+  push:
+    - main
+  paths:
+    - '.github/workflows/commoncicd.yaml'
+
+env:
+  PROJECT_ID: demo-project
+  REGION: us-central1
+  REPOSITORY: featurecicd
+  APP_IMAGE: app-image
+  SUB_IMAGE: sub-image
+  PRE_IMAGE: pre-image
+  TAG: latest
+  # GAR_LOCATION: ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/${{env.IMAGE_NAME}}
+
+jobs:
+  docker-build:
+    runs-on: ['self-hosted', 'Windows', 'X64']
+    steps:
+      - name: checkout the source code
+        uses: actions/checkout@v4
+      
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{secrets.GCP_SERVICE_ACCOUNT_key}}' 
+
+      - name: setup cloud sdk
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          PROJECT_ID: ${{env.PROJECT_ID}}
+          export_default_credentials: true
+        
+      - name: Configure docker for Artifact registry
+        run: |
+          gcloud auth configure-docker ${{env.REGION}} -docker.pkg.dev --quiet
+      
+      - name: Build Docker Image 
+        run: |
+          docker build -t ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.APP_IMAGE}}:$TAG .
+          docker build -t ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.PRE_IMAGE}}:$TAG .
+          docker build -t ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.SUB_IMAGE}}:$TAG .
+      
+      - name: Push docker image to Artifact registry
+        run: |
+          docker push ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.APP_IMAGE}}:$TAG
+          docker push ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.PRE_IMAGE}}:$TAG
+          docker push ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY}}/{{env.SUB_IMAGE}}:$TAG
