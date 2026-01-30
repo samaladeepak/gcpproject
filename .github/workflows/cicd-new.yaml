@@ -17,6 +17,7 @@ env:
   GKE_CLUSTER: autopilot-cluster-1
   GKE_ZONE: us-west1
   GKE_NAMESPACE: default
+  DEPLOYMENT_NAME: service-patient
 
 jobs:
   build-and-deploy:
@@ -87,9 +88,10 @@ jobs:
     # 8️⃣ Deploy to GKE
     - name: Deploy to GKE
       run: |
-        kubectl set image deployment/my-deployment \
-        my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:${{ github.sha }} \
-        -n ${{ env.GKE_NAMESPACE }}
+        kubectl create deployment ${{ env.DEPLOYMENT_NAME }} \
+          --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:${{ github.sha }} \
+          -n ${{ env.GKE_NAMESPACE }}
+
 
     #           # 5️⃣ Install Helm (if not already)
     # - name: Setup Helm
