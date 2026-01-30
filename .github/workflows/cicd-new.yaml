@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: qwiklabs-gcp-00-e300216e6bf3
+  PROJECT_ID: qwiklabs-gcp-01-5d31b7318694
   REGION: us-west1
   REPOSITORY: demo-ar
   IMAGE_NAME: service-patient
@@ -60,8 +60,9 @@ jobs:
    # 5️⃣ Build Docker image
     - name: Build Docker image
       run: |
-        docker build -t \
-        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
+        docker build \
+        -f ./service-patient/Dockerfile \
+        -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
 
       # 6️⃣ Push Docker image
     - name: Push Docker image
