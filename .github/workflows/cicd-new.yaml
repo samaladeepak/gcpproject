@@ -47,17 +47,27 @@ jobs:
       run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
 # Step 5: Build and push Docker image to Artifact Registry
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v6
-      with:
-        context: ./service-patient
-        file: ./service-patient/Dockerfile
-        push: true
-        tags: |
-          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
-          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
+    # - name: Build and Push Docker Image
+    #   uses: docker/build-push-action@v6
+    #   with:
+    #     context: ./service-patient
+    #     file: ./service-patient/Dockerfile
+    #     push: true
+    #     tags: |
+    #       ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+    #       ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
 
-      
+   # 5️⃣ Build Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t \
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
+
+      # 6️⃣ Push Docker image
+    - name: Push Docker image
+      run: |
+        docker push \
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
     # # 7️⃣ Get GKE credentials
     # - name: Get GKE credentials
     #   uses: google-github-actions/get-gke-credentials@v2
