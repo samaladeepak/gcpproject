@@ -84,27 +84,27 @@ jobs:
         location: ${{ env.GKE_ZONE }}
         project_id: ${{ env.PROJECT_ID }}
 
-    # # 8️⃣ Deploy to GKE
-    # - name: Deploy to GKE
-    #   run: |
-    #     kubectl set image deployment/my-deployment \
-    #     my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:${{ github.sha }} \
-    #     -n ${{ env.GKE_NAMESPACE }}
-
-              # 5️⃣ Install Helm (if not already)
-    - name: Setup Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: v3.12.0
-
-      # 6️⃣ Deploy/Upgrade via Helm
-    - name: Deploy to GKE using Helm
+    # 8️⃣ Deploy to GKE
+    - name: Deploy to GKE
       run: |
-        helm upgrade --install ${{ env.HELM_RELEASE }} ${{ env.HELM_CHART_PATH }} \
-          --namespace default \
-          --set image.repository=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }} \
-          --set image.tag=${{ env.TAG }} \
-          --wait
+        kubectl set image deployment/my-deployment \
+        my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }}:${{ github.sha }} \
+        -n ${{ env.GKE_NAMESPACE }}
+
+    #           # 5️⃣ Install Helm (if not already)
+    # - name: Setup Helm
+    #   uses: azure/setup-helm@v3
+    #   with:
+    #     version: v3.12.0
+
+    #   # 6️⃣ Deploy/Upgrade via Helm
+    # - name: Deploy to GKE using Helm
+    #   run: |
+    #     helm upgrade --install ${{ env.HELM_RELEASE }} ${{ env.HELM_CHART_PATH }} \
+    #       --namespace default \
+    #       --set image.repository=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE2_NAME }} \
+    #       --set image.tag=${{ env.TAG }} \
+    #       --wait
 
     # # 9️⃣ Verify rollout
     # - name: Verify deployment
