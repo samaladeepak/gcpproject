@@ -1,0 +1,73 @@
+name: CI-CD-GCP-GKE
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: qwiklabs-gcp-00-e300216e6bf3
+  REGION: us-west1
+  REPOSITORY: demo-ar
+  IMAGE_NAME: appointment
+  # GKE_CLUSTER: my-gke-cluster
+  # GKE_ZONE: us-west
+  # GKE_NAMESPACE: default
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout source code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2️⃣ Authenticate to GCP using Service Account Key
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    # 3️⃣ Setup gcloud
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    # 4️⃣ Configure Docker for Artifact Registry
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+    # 5️⃣ Build Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t \
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+    # 6️⃣ Push Docker image to Artifact Registry
+    - name: Push Docker image
+      run: |
+        docker push \
+        ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    # # 7️⃣ Get GKE credentials
+    # - name: Get GKE credentials
+    #   uses: google-github-actions/get-gke-credentials@v2
+    #   with:
+    #     cluster_name: ${{ env.GKE_CLUSTER }}
+    #     location: ${{ env.GKE_ZONE }}
+    #     project_id: ${{ env.PROJECT_ID }}
+
+    # # 8️⃣ Deploy to GKE
+    # - name: Deploy to GKE
+    #   run: |
+    #     kubectl set image deployment/my-deployment \
+    #     my-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+    #     -n ${{ env.GKE_NAMESPACE }}
+
+    # # 9️⃣ Verify rollout
+    # - name: Verify deployment
+    #   run: |
+    #     kubectl rollout status deployment/my-deployment -n ${{ env.GKE_NAMESPACE }}
